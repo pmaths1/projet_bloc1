@@ -1,0 +1,10 @@
+\contentsline {section}{\numberline {1}Le jeu d'exemples}{1}{section.1}% 
+\contentsline {section}{\numberline {2}D\IeC {\'e}terminer le plus proche voisin d'un point}{1}{section.2}% 
+\contentsline {subsection}{\numberline {2.1}Distance entre deux images}{1}{subsection.2.1}% 
+\contentsline {subsection}{\numberline {2.2}Exemple d'utilisation}{2}{subsection.2.2}% 
+\contentsline {subsection}{\numberline {2.3}les k plus proches voisins}{2}{subsection.2.3}% 
+\contentsline {section}{\numberline {3}Parcours du jeu de donn\IeC {\'e}es}{3}{section.3}% 
+\contentsline {subsection}{\numberline {3.1}Le plus proche voisin avec le jeu de donn\IeC {\'e}es}{4}{subsection.3.1}% 
+\contentsline {subsection}{\numberline {3.2}D\IeC {\'e}terminer les k plus proches voisins d'un point}{4}{subsection.3.2}% 
+\contentsline {section}{\numberline {4}Pr\IeC {\'e}dire l'\IeC {\'e}tiquette d'une donn\IeC {\'e}e}{4}{section.4}% 
+\contentsline {section}{\numberline {5}Optimisation}{5}{section.5}% 
