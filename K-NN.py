@@ -76,7 +76,7 @@ def lesKplusProchesVoisins2 (image, k, data):
         Kppv. append (indice)
     return (Kppv)
 
-def predire (l,k,data):
+def predire (l,k,data,target):
     '''
     @return : int
     '''

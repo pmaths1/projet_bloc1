@@ -103,7 +103,7 @@ display(ecrit1)
 # Télécharger les données mnist c'est un peu long
 from sklearn.datasets import fetch_openml
 
-mnist = fetch_openml('mnist_784', version=1,data_home='/home/pascal')
+mnist = fetch_openml('mnist_784', version=1)
 
 #print(mnist.data.shape)
 

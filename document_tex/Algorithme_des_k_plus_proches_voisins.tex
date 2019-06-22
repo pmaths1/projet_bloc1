@@ -1,5 +1,6 @@
 \documentclass[10pt,lang=french]{scrartcl}
 \usepackage{fourier}
+\usepackage{pythonhighlight}
 \usepackage[scaled=0.87]{helvet}
 \renewcommand{\ttdefault}{lmtt}
 \usepackage[T1]{fontenc}
@@ -621,5 +622,26 @@ majoritairement sur les \emph{k} plus proches voisins.
 {\color{incolor}In [{\color{incolor} }]:} \PY{n}{taux\PYZus{}erreur}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{)}
 \end{Verbatim}
 \end{code} 
-    
+\begin{python}
+def lesKplusProchesVoisins (image, k, data):
+    '''
+    @summary:   determine une liste des indices du tableau data dont la distance entre image et ces elements est minimal
+    @parameter: image est une liste representant l'image
+    k est le nombre de voisins 'a chercher
+    @var :      data est liste d'image de reference
+    @return:    liste
+    '''
+    listeDesDistances = []
+    for img in data:
+        listeDesDistances.append (distance (image, img))
+    Kppv = []
+    for i in range (k):
+        p = float ("inf")
+        for j in range (len (data)):
+            if listeDesDistances [j] != 0 and listeDesDistances [j] < p and j not in Kppv:
+                p = listeDesDistances [j]
+                indice = j
+            Kppv. append (indice)
+    return (Kppv)  
+\end{python}
     \end{document}
