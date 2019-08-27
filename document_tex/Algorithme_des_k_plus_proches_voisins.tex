@@ -1,6 +1,5 @@
 \documentclass[10pt,lang=french]{scrartcl}
 \usepackage{fourier}
-\usepackage{pythonhighlight}
 \usepackage[scaled=0.87]{helvet}
 \renewcommand{\ttdefault}{lmtt}
 \usepackage[T1]{fontenc}
@@ -368,7 +367,7 @@ codes postaux par exemple). \includegraphics{lettres.jpg}
 \begin{Verbatim}[commandchars=\\\{\}]
 \PY{k}{def} \PY{n+nf}{distance} \PY{p}{(}\PY{n}{a}\PY{p}{,} \PY{n}{b}\PY{p}{)}\PY{p}{:}
         \PY{n}{somme} \PY{o}{=} \PY{l+m+mi}{0}
-        \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range} \PY{p}{(}\PY{l+m+mi}{784}\PY{p}{)}\PY{p}{:}
+        \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range} \PY{p}{(}\PY{l+m+mi}{\PY{k}{len}(a)}\PY{p}{)}\PY{p}{:}
             \PY{n}{somme} \PY{o}{+}\PY{o}{=} \PY{n+nb}{abs}\PY{p}{(}\PY{n}{a}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{\PYZhy{}} \PY{n}{b}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{)} 
         \PY{k}{return} \PY{n}{somme}
 \end{Verbatim}
@@ -468,18 +467,24 @@ On cherche à déterminer les proches voisins du caractère entouré
 \end{tikzpicture}
 \section{Parcours du jeu de données}
 
-    Le jeu de données est relativement petit mais pour l'algorithme des k
-plus proches voisins, il est déjà trop gros pour obtenir rapidement des
-résultats. On va donc effectuer un échantillonnage et travailler sur
-seulement 5000 données.
+Nous prendrons de cette base de données un extrait de 5000 données
+uniquement, afin de limiter les temps de calcul de notre algorithme.
 
-\medskip
+Il nous faut obtenir deux listes, \textbf{data} et \textbf{target}.
 
-On obtient deux listes, \textbf{data} et \textbf{target}.data
-contient les images sous forme d'une liste 28x28 = 784 entiers
-compris entre 0 et 255 correspondant aux différentes nuances de gris
-(255 étant blanc et 0 noir)  target contient les chiffres correspondant
-à l'image
+\begin{itemize}
+    \tightlist
+    \item
+    \textbf{data} contient les images sous forme d'une liste de 28*28 =
+    784 entiers compris entre 0 et 255 correspondant aux différentes
+    nuances de gris (255 étant blanc et 0 noir)
+    \item
+    \textbf{target} contient les chiffres (de type int) correspondant à
+    l'image
+\end{itemize}
+\begin{enumerate}
+    \item  Tout d'abord on récupère la base de donnée complète (cela peut prendre
+beaucoup de temps) :
 \begin{code}
     \begin{Verbatim}[commandchars=\\\{\}]
 {\color{incolor}In [{\color{incolor} }]:} \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{datasets} \PY{k}{import} \PY{n}{fetch\PYZus{}openml}
@@ -488,11 +493,17 @@ compris entre 0 et 255 correspondant aux différentes nuances de gris
         \PY{n+nb}{print}\PY{p}{(}\PY{n}{mnist}\PY{o}{.}\PY{n}{data}\PY{o}{.}\PY{n}{shape}\PY{p}{)}
         \PY{n+nb}{print}\PY{p}{(}\PY{n}{mnist}\PY{o}{.}\PY{n}{target}\PY{o}{.}\PY{n}{shape}\PY{p}{)}
 \end{Verbatim}
+\end{code}
 
+\item Ensuite on en prend l'extrait que l'on met sous la forme qui nous
+convient (on aura besoin de 1000 autres images plus tard, d'où les 6000)
+:
+
+\begin{code}
     \begin{Verbatim}[commandchars=\\\{\}]
 {\color{incolor}In [{\color{incolor} }]:} \PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np}
         
-        \PY{n}{sample} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{random}\PY{o}{.}\PY{n}{randint}\PY{p}{(}\PY{l+m+mi}{70000}\PY{p}{,} \PY{n}{size}\PY{o}{=}\PY{l+m+mi}{5000}\PY{p}{)}
+        \PY{n}{sample} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{random}\PY{o}{.}\PY{n}{randint}\PY{p}{(}\PY{l+m+mi}{70000}\PY{p}{,} \PY{n}{size}\PY{o}{=}\PY{l+m+mi}{6000}\PY{p}{)}
         
         \PY{n}{data} \PY{o}{=} \PY{n}{mnist}\PY{o}{.}\PY{n}{data}\PY{p}{[}\PY{n}{sample}\PY{p}{]}
         \PY{n}{data} \PY{o}{=} \PY{n+nb}{map}\PY{p}{(}\PY{k}{lambda} \PY{n}{x}\PY{p}{:} 
@@ -501,7 +512,7 @@ compris entre 0 et 255 correspondant aux différentes nuances de gris
 \end{Verbatim}
 \end{code}
 
-    Afficher la liste correspondant à la 23ème image du jeu de données. A
+\item    Afficher la liste correspondant à la 23ème image du jeu de données. A
 quel chiffre corrrespond cette image ?
 
 \begin{code}
@@ -511,18 +522,27 @@ quel chiffre corrrespond cette image ?
         \PY{n+nb}{print} \PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Le chiffre represente est :}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{target}\PY{p}{[}\PY{l+m+mi}{23}\PY{p}{]}\PY{p}{)}
 \end{Verbatim}
 \end{code}
-    Dans la cellule ci-dessous vous allez prendre deux éléments de notre jeu
-de données, calculer la distance entre ces deux images et indiquer le
-chiffre qu'il représente
+
+\item Appliquer cet algorithme à image1 et image2, et vérifier si
+l'algorithme a trouvé un voisin qui représente le même chiffre.
+
 \begin{code}
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}}  ]:} \PY{n}{image1} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{l+m+mi}{23}\PY{p}{]}
-         \PY{n}{image2} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{l+m+mi}{65}\PY{p}{]}
-         \PY{n}{distance}\PY{p}{(}\PY{n}{image1}\PY{p}{,}\PY{n}{image2}\PY{p}{)}
-         \PY{n}{target}\PY{p}{[}\PY{l+m+mi}{23}\PY{p}{]}
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor} }]:} \PY{n}{indice1} \PY{o}{=} \PY{n}{lePlusProcheVoisin}\PY{p}{(}\PY{n}{image1}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{n}{target}\PY{p}{[}\PY{n}{indice1}\PY{p}{]}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{n}{target}\PY{p}{[}\PY{n}{i1}\PY{p}{]}\PY{p}{)}
+
+\PY{n}{indice2} \PY{o}{=} \PY{n}{lePlusProcheVoisin}\PY{p}{(}\PY{n}{image2}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{n}{target}\PY{p}{[}\PY{n}{indice2}\PY{p}{]}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{n}{target}\PY{p}{[}\PY{n}{i2}\PY{p}{]}\PY{p}{)}
 \end{Verbatim}
 \end{code}
-            
+
+On remarque éventuellement que ce n'est pas forcément parfait, le
+résultat n'étant pas toujours celui attendu.
+
+
+\end{enumerate}        
 
 \subsection{Le plus proche voisin avec le jeu de données}
 
@@ -546,6 +566,8 @@ dans data du plus proche voisin.
 
 \subsection{Déterminer les k plus proches voisins d'un point}
 
+\begin{enumerate}
+    \item 
 Écrire une fonction \textbf{lesKplusProchesVoisins} qui prend en paramètre une
 image et une valeur de k et renvoie la liste des indices dans data des k
 plus proches voisins. Quand vous prenez k = 1, cette fonction doit
@@ -554,7 +576,7 @@ renvoyer le même résultat que la précédente, mis à part le fait que
 \textbf{lesKplusProchesVoisins} renvoie une liste d'un élément.
 \begin{code}
 
-    \begin{Verbatim}[commandchars=\\\{\}]
+   \begin{Verbatim}[commandchars=\\\{\}]
 {\color{incolor}In [{\color{incolor}  }]:} \PY{k}{def} \PY{n+nf}{lesKplusProchesVoisins} \PY{p}{(}\PY{n}{image}\PY{p}{,} \PY{n}{k}\PY{p}{)}\PY{p}{:}
              \PY{n}{listeDesDistances} \PY{o}{=} \PY{p}{[}\PY{p}{]}
              \PY{k}{for} \PY{n}{img} \PY{o+ow}{in} \PY{n}{data}\PY{p}{:}
@@ -563,7 +585,8 @@ renvoyer le même résultat que la précédente, mis à part le fait que
              \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range} \PY{p}{(}\PY{n}{k}\PY{p}{)}\PY{p}{:}
                  \PY{n}{p} \PY{o}{=} \PY{n+nb}{float} \PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{inf}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
                  \PY{k}{for} \PY{n}{j} \PY{o+ow}{in} \PY{n+nb}{range} \PY{p}{(}\PY{n+nb}{len} \PY{p}{(}\PY{n}{data}\PY{p}{)}\PY{p}{)}\PY{p}{:}
-                     \PY{k}{if} \PY{n}{listeDesDistances} \PY{p}{[}\PY{n}{j}\PY{p}{]} \PY{o}{!=} \PY{l+m+mi}{0} \PY{o+ow}{and} \PY{n}{listeDesDistances} \PY{p}{[}\PY{n}{j}\PY{p}{]} \PY{o}{\PYZlt{}} \PY{n}{p} \PY{o+ow}{and} \PY{n}{j} \PY{o+ow}{not} \PY{o+ow}{in} \PY{n}{Kppv}\PY{p}{:}
+                     \PY{k}{if} \PY{n}{listeDesDistances} \PY{p}{[}\PY{n}{j}\PY{p}{]} \PY{o}{!=} \PY{l+m+mi}{0} \PY{o+ow}{and} \PY{n}{listeDesDistances} \PY{p}{[}\PY{n}{j}\PY{p}{]} \PY{o}{\PYZlt{}} \PY{n}{p} \PY{o+ow}{and}
+                      \PY{n}{j} \PY{o+ow}{not} \PY{o+ow}{in} \PY{n}{Kppv}\PY{p}{:}
                          \PY{n}{p} \PY{o}{=} \PY{n}{listeDesDistances} \PY{p}{[}\PY{n}{j}\PY{p}{]}
                          \PY{n}{indice} \PY{o}{=} \PY{n}{j}
                  \PY{n}{Kppv}\PY{o}{.} \PY{n}{append} \PY{p}{(}\PY{n}{indice}\PY{p}{)}
@@ -571,7 +594,14 @@ renvoyer le même résultat que la précédente, mis à part le fait que
 \end{Verbatim}
 \end{code}
 
+\item
+Exécuter l'algorithme avec image1 et k=5, puis donner la liste des
+chiffres associés aux images dont l'algorithme donne les indices dans
+notre base.
+\end{enumerate}
+
 \section{Prédire l'étiquette d'une donnée}
+
 
 Écrire une fonction \textbf{predire} qui prend en paramètre une image dans
 le même format que celles de data et un entier \emph{k} et retourne le
@@ -593,55 +623,57 @@ majoritairement sur les \emph{k} plus proches voisins.
                          \PY{n}{indice} \PY{o}{=} \PY{n}{i}
              \PY{k}{return} \PY{n}{indice}
 \end{Verbatim}
-\end{code}       
+\end{code}      
+
 \section{Optimisation}
+
+Prenons maintenant un jeu d'images à tester, qui sont en dehors de la
+base des 5000 images traitées par l'algorithme.
+
+
+
+Notre but est de calculer le taux d'erreur des prédictions, puis de
+chercher la meilleure valeur de \emph{k} à choisir pour diminuer
+celui-ci.
+
+\begin{enumerate}
+    \item
+    Écrire une fonction qui calcule le taux d'erreur sur les prédictions
+    portant sur le jeu d'images à tester. Exécuter ensuite cette fonction
+    pour une valeur de \emph{k} choisie entre 2 et 7.
+
 \begin{code}
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}  }]:} \PY{k+kn}{from} \PY{n+nn}{data\PYZus{}target\PYZus{}test} \PY{k}{import} \PY{n}{data} \PY{k}{as} \PY{n}{data\PYZus{}test}\PY{p}{,}\PY{n}{target} \PY{k}{as} \PY{n}{target\PYZus{}test}
-         
-         \PY{k}{def} \PY{n+nf}{taux\PYZus{}erreur}\PY{p}{(}\PY{n}{k}\PY{p}{)}\PY{p}{:}
-             \PY{l+s+sd}{\PYZsq{}\PYZsq{}\PYZsq{}}
-         \PY{l+s+sd}{    calcule le taux d\PYZsq{}erreur avec la valeur k pour les k plus proches voisins}
-         \PY{l+s+sd}{    \PYZsq{}\PYZsq{}\PYZsq{}}
-             \PY{n}{t}\PY{o}{=}\PY{l+m+mi}{0}
-             \PY{n}{n}\PY{o}{=}\PY{l+m+mi}{100}\PY{c+c1}{\PYZsh{}len(target\PYZus{}test)}
-             \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n}{n}\PY{p}{)}\PY{p}{:}
-                 \PY{k}{if} \PY{n}{predire}\PY{p}{(}\PY{n}{data\PYZus{}test}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{,}\PY{n}{k}\PY{p}{)}\PY{o}{!=}\PY{n}{target\PYZus{}test}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{:}
-                     \PY{n}{t}\PY{o}{+}\PY{o}{=}\PY{l+m+mi}{1}
-             \PY{k}{return} \PY{n}{t}\PY{o}{/}\PY{n}{n}
-         
-         \PY{k}{def} \PY{n+nf}{optimisation}\PY{p}{(}\PY{n}{n}\PY{p}{)}\PY{p}{:}
-             \PY{l+s+sd}{\PYZsq{}\PYZsq{}\PYZsq{}}
-         \PY{l+s+sd}{    détermine quelle valeur de k donne la meilleure prédiction, avec k entre 1 et n}
-         \PY{l+s+sd}{    \PYZsq{}\PYZsq{}\PYZsq{}}
-             \PY{n}{liste\PYZus{}taux}\PY{o}{=}\PY{p}{[}\PY{n}{taux\PYZus{}erreur}\PY{p}{(}\PY{n}{k}\PY{p}{)} \PY{k}{for} \PY{n}{k} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,}\PY{n}{n}\PY{o}{+}\PY{l+m+mi}{1}\PY{p}{)}\PY{p}{]}
-             \PY{k}{return} \PY{n}{liste\PYZus{}taux}\PY{o}{.}\PY{n}{index}\PY{p}{(}\PY{n+nb}{min}\PY{p}{(}\PY{n}{liste\PYZus{}taux}\PY{p}{)}\PY{p}{)}\PY{o}{+}\PY{l+m+mi}{1}
-\end{Verbatim}
+    {\color{incolor}In [{\color{incolor}  }]:} \PY{k+kn}{from} \PY{n+nn}{data\PYZus{}target\PYZus{}test} \PY{k}{import} \PY{n}{data} \PY{k}{as} \PY{n}{data\PYZus{}test}\PY{p}{,}\PY{n}{target} \PY{k}{as} \PY{n}{target\PYZus{}test}
+    
+    \PY{k}{def} \PY{n+nf}{taux\PYZus{}erreur}\PY{p}{(}\PY{n}{k}\PY{p}{)}\PY{p}{:}
+    \PY{l+s+sd}{\PYZsq{}\PYZsq{}\PYZsq{}}
+    \PY{l+s+sd}{    calcule le taux d\PYZsq{}erreur avec la valeur k pour les k plus proches voisins}
+    \PY{l+s+sd}{    \PYZsq{}\PYZsq{}\PYZsq{}}
+    \PY{n}{t}\PY{o}{=}\PY{l+m+mi}{0}
+    \PY{n}{n}\PY{o}{=}\PY{l+m+mi}{100}\PY{c+c1}{\PYZsh{}len(target\PYZus{}test)}
+    \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n}{n}\PY{p}{)}\PY{p}{:}
+    \PY{k}{if} \PY{n}{predire}\PY{p}{(}\PY{n}{data\PYZus{}test}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{,}\PY{n}{k}\PY{p}{)}\PY{o}{!=}\PY{n}{target\PYZus{}test}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{:}
+    \PY{n}{t}\PY{o}{+}\PY{o}{=}\PY{l+m+mi}{1}
+    \PY{k}{return} \PY{n}{t}\PY{o}{/}\PY{n}{n}
+    
+    \end{Verbatim}
+\end{code} 
+\item
+Écrire une fonction optimisation(n) qui détermine la valeur de
+\emph{k}, entre 1 et n, qui minimise le taux d'erreur, puis donner le
+résultat de cette fonction avec n=7.
+\begin{code}
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor} }]:} \PY{k}{def} \PY{n+nf}{optimisation}\PY{p}{(}\PY{n}{n}\PY{p}{)}\PY{p}{:}
+\PY{l+s+sd}{\PYZsq{}\PYZsq{}\PYZsq{}}
+\PY{l+s+sd}{    détermine quelle valeur de k donne la meilleure prédiction, avec k entre 1 et n}
+\PY{l+s+sd}{    \PYZsq{}\PYZsq{}\PYZsq{}}
+\PY{n}{liste\PYZus{}taux}\PY{o}{=}\PY{p}{[}\PY{n}{taux\PYZus{}erreur}\PY{p}{(}\PY{n}{k}\PY{p}{)} \PY{k}{for} \PY{n}{k} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,}\PY{n}{n}\PY{o}{+}\PY{l+m+mi}{1}\PY{p}{)}\PY{p}{]}
+\PY{k}{return} \PY{n}{liste\PYZus{}taux}\PY{o}{.}\PY{n}{index}\PY{p}{(}\PY{n+nb}{min}\PY{p}{(}\PY{n}{liste\PYZus{}taux}\PY{p}{)}\PY{p}{)}\PY{o}{+}\PY{l+m+mi}{1}
 
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor} }]:} \PY{n}{taux\PYZus{}erreur}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{n}{optimisation}\PY{p}{(}\PY{l+m+mi}{7}\PY{p}{)}\PY{p}{)}
 \end{Verbatim}
 \end{code} 
-\begin{python}
-def lesKplusProchesVoisins (image, k, data):
-    '''
-    @summary:   determine une liste des indices du tableau data dont la distance entre image et ces elements est minimal
-    @parameter: image est une liste representant l'image
-    k est le nombre de voisins 'a chercher
-    @var :      data est liste d'image de reference
-    @return:    liste
-    '''
-    listeDesDistances = []
-    for img in data:
-        listeDesDistances.append (distance (image, img))
-    Kppv = []
-    for i in range (k):
-        p = float ("inf")
-        for j in range (len (data)):
-            if listeDesDistances [j] != 0 and listeDesDistances [j] < p and j not in Kppv:
-                p = listeDesDistances [j]
-                indice = j
-            Kppv. append (indice)
-    return (Kppv)  
-\end{python}
+\end{enumerate}
     \end{document}
